@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: false,
       ),
-      initialRoute: AppScreensNames.base,
+      initialRoute: AppScreensNames.login,
       onInit: () { },
       getPages: AppScreens.pages,
       localizationsDelegates: const [
