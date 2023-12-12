@@ -1,61 +1,77 @@
 import 'dart:convert';
-
-import 'package:flutterbase/data/models/setor.dart';
-import 'package:flutterbase/data/models/setor.dart';
 import 'package:flutterbase/data/models/setor.dart';
 import 'package:flutterbase/data/models/unidade_empresarial.dart';
 import 'package:flutterbase/data/models/usuario.dart';
-import 'package:flutterbase/data/models/usuario.dart';
-import 'package:flutterbase/data/models/usuario.dart';
-
-import '../../../network/app_endpoints.dart';
+import 'package:flutterbase/utils.dart';
+import '../../../constants.dart';
 import '../../../network/http_manager.dart';
 import '../../../network/response/api_result.dart';
 
 class LoginRepository {
 
   final HttpManager _httpManager = HttpManager();
+  Utils utils = Utils();
 
   String username = 'hjsystems';
   String password = '11032011';
 
+  Future<String> _getBaseUrl() async {
+    String? baseUrl = await utils.getLocalData(key: Constants.BASE_URL);
+    return baseUrl ?? 'http://52.4.98.235:9986';
+  }
 
   Future<ApiResult> getUnidadesEmpresariais() async {
 
     String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    String baseUrl = await _getBaseUrl();
 
     final result = await _httpManager.restRequest(
-      url: ApiEndPoints.getUnidadadesEmpresarias,
+      url: "$baseUrl/getUnidadesEmpresariais",
       method: HttpMethods.get,
       headers: {
         'Authorization': basicAuth,
       },
     );
 
-    if (result != null) {
-      List<UnidadeEmpresarial> unidades = List<Map<String, dynamic>>.from(result).map(UnidadeEmpresarial.fromJson).toList();
-      return ApiResult<List<UnidadeEmpresarial>>.success(unidades);
-    } else {
-      return ApiResult.error('Não foi possível recuperar a lista de unidades empresariais');
+    try {
+      if (result != null) {
+        List<UnidadeEmpresarial> unidades = List<Map<String, dynamic>>.from(
+            result).map(UnidadeEmpresarial.fromJson).toList();
+        return ApiResult<List<UnidadeEmpresarial>>.success(unidades);
+      } else {
+        return ApiResult.error(
+            'Não foi possível recuperar a lista de unidades empresariais');
+      }
+    }catch (e) {
+      print("erro ao recuperar lista de empresas $e");
+      return ApiResult.error(
+          'Não foi possível recuperar a lista de unidades empresariais');
     }
   }
 
   Future<ApiResult> getSetor() async {
 
     String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    String baseUrl = await _getBaseUrl();
 
     final result = await _httpManager.restRequest(
-      url: ApiEndPoints.getSetor,
+      url: "$baseUrl/getSetor",
       method: HttpMethods.get,
       headers: {
         'Authorization': basicAuth,
       },
     );
 
-    if (result != null) {
-      List<Setor> unidades = List<Map<String, dynamic>>.from(result).map(Setor.fromJson).toList();
-      return ApiResult<List<Setor>>.success(unidades);
-    } else {
+    try {
+      if (result != null) {
+        List<Setor> unidades = List<Map<String, dynamic>>.from(result).map(
+            Setor.fromJson).toList();
+        return ApiResult<List<Setor>>.success(unidades);
+      } else {
+        return ApiResult.error('Não foi possível recuperar a lista de setores');
+      }
+    } catch (e) {
+      print("erro ao recuperar lista de setores $e");
       return ApiResult.error('Não foi possível recuperar a lista de setores');
     }
   }
@@ -63,20 +79,29 @@ class LoginRepository {
   Future<ApiResult> getUsuarios({required String unemId}) async {
 
     String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    String baseUrl = await _getBaseUrl();
 
     final result = await _httpManager.restRequest(
-      url: "${ApiEndPoints.getUsuarios}?unemid=$unemId",
+      url: "$baseUrl/getUsuarios?unemid=$unemId",
       method: HttpMethods.get,
       headers: {
         'Authorization': basicAuth,
       },
     );
 
-    if (result != null) {
-      List<Usuario> usuarios = List<Map<String, dynamic>>.from(result).map(Usuario.fromJson).toList();
-      return ApiResult<List<Usuario>>.success(usuarios);
-    } else {
-      return ApiResult.error('Não foi possível recuperar a lista de usuários');
+    try {
+      if (result != null) {
+        List<Usuario> usuarios = List<Map<String, dynamic>>.from(result).map(
+            Usuario.fromJson).toList();
+        return ApiResult<List<Usuario>>.success(usuarios);
+      } else {
+        return ApiResult.error(
+            'Não foi possível recuperar a lista de usuários');
+      }
+    } catch (e) {
+      print("erro ao recuperar lista de usuarios $e");
+      return ApiResult.error(
+          'Não foi possível recuperar a lista de usuários');
     }
   }
 

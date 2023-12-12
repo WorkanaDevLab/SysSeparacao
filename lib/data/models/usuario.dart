@@ -14,4 +14,9 @@ class Usuario {
 
   Map<String, dynamic> toJson() => _$UsuarioToJson(this);
 
+  @override
+  String toString() {
+    return 'Usuario{USRS_ID: $USRS_ID, USRS_LOGIN: $USRS_LOGIN, USRS_SENHA: $USRS_SENHA}';
+  }
+
 }

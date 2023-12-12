@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutterbase/route/app_screens_controller.dart';
 import 'package:flutterbase/route/app_screens_name.dart';
+import 'package:flutterbase/ui/login/controller/login_controller.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 void main() {
@@ -20,8 +22,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: false,
       ),
-      initialRoute: AppScreensNames.login,
-      onInit: () { },
+      initialRoute: AppScreensNames.base,
+      onInit: () {
+        Get.put(LoginController(), permanent: true);
+      },
       getPages: AppScreens.pages,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

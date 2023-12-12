@@ -14,4 +14,9 @@ class UnidadeEmpresarial {
 
   Map<String, dynamic> toJson() => _$UnidadeEmpresarialToJson(this);
 
+  @override
+  String toString() {
+    return 'UnidadeEmpresarial{unem_Fantasia: $unem_Fantasia, unem_Id: $unem_Id, unem_Sigla: $unem_Sigla}';
+  }
+
 }

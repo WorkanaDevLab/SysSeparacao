@@ -13,4 +13,9 @@ class Setor {
 
   Map<String, dynamic> toJson() => _$SetorToJson(this);
 
+  @override
+  String toString() {
+    return 'Setor{SETR_ID: $SETR_ID, SETR_NOME: $SETR_NOME}';
+  }
+
 }

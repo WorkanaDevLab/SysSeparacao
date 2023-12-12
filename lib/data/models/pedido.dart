@@ -27,6 +27,9 @@ class Pedido {
 
   Map<String, dynamic> toJson() => _$PedidoToJson(this);
 
-
+  @override
+  String toString() {
+    return 'Pedido{PDDS_ID: $PDDS_ID, PDDS_CODIGO: $PDDS_CODIGO, PESS_FANTAZIA: $PESS_FANTAZIA, PDDS_STATUS: $PDDS_STATUS, PDDS_PREV_ENTG: $PDDS_PREV_ENTG, PDDS_ENTREGA: $PDDS_ENTREGA, PDDS_SEPARADOR: $PDDS_SEPARADOR, PDHT_STATUS: $PDHT_STATUS}';
+  }
 
 }

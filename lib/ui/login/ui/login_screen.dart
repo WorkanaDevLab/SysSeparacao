@@ -21,7 +21,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   Utils utils = Utils();
 
   final GlobalKey<FormState> _formKey = GlobalKey();
@@ -31,11 +30,25 @@ class _LoginScreenState extends State<LoginScreen> {
   Setor? _selectedSetor;
   Usuario? _selectedUsuario;
 
+  LoginController loginController = Get.find<LoginController>();
+
+  @override
+  void initState() {
+    getAppData();
+    super.initState();
+  }
+
+  void getAppData() {
+    loginController.getUnidadesEmpresariais();
+    loginController.getSetor();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        centerTitle: true,
         title: const Text("SYS SEPARAÇÃO"),
         backgroundColor: Colors.blue,
         actions: [
@@ -56,6 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              GetBuilder<LoginController>(
+                  builder: (controller) {
+                if (loginController.hasError.value) {
+                  buildErrorDialog(context);
+                }
+                return Container();
+              }),
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
@@ -81,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onChanged: (selected) {
                         setState(() {
                           _selectedUnidade = controller.unidades.firstWhere(
-                                  (un) => un.unem_Id == selected!.unem_Id,
+                              (un) => un.unem_Id == selected!.unem_Id,
                               orElse: () => UnidadeEmpresarial());
                           controller.getUsuarios(
                               unemId: _selectedUnidade!.unem_Id!);
@@ -107,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onChanged: (selected) {
                         setState(() {
                           _selectedUsuario = controller.usuarios.firstWhere(
-                                  (un) => un.USRS_ID == selected!.USRS_ID,
+                              (un) => un.USRS_ID == selected!.USRS_ID,
                               orElse: () => Usuario());
                         });
                       },
@@ -131,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onChanged: (selected) {
                         setState(() {
                           _selectedSetor = controller.setor.firstWhere(
-                                  (un) => un.SETR_ID == selected!.SETR_ID,
+                              (un) => un.SETR_ID == selected!.SETR_ID,
                               orElse: () => Setor());
                         });
                       },
@@ -144,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 8,
               ),
               CustomTextField(
-                controller: TextEditingController(),
+                controller: passwordController,
                 labelText: "Senha",
                 isSecret: true,
                 validator: (password) {
@@ -162,23 +182,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     Expanded(
                         child: CustomButton(
                             onTap: () {
-
-                              Get.toNamed(AppScreensNames.main);
-                              /*
                               if (_formKey.currentState!.validate()) {
-                                if(_selectedUsuario != null && _selectedUnidade != null && _selectedSetor != null) {
+                                if (_selectedUsuario != null &&
+                                    _selectedUnidade != null &&
+                                    _selectedSetor != null) {
                                   controller.signIn(
                                       password: passwordController.text.trim(),
                                       usuarioId: _selectedUsuario!.USRS_ID!,
                                       unem: _selectedUnidade!,
                                       setor: _selectedSetor!);
                                 } else {
-                                  utils.showToast(message: "Preencha todas as informações.", isError: true);
+                                  utils.showToast(
+                                      message: "Preencha todas as informações.",
+                                      isError: true);
                                 }
                               }
-
-                               */
-                            }, buttonText: "LOGIN", color: Colors.blue)),
+                            },
+                            buttonText: "LOGIN",
+                            color: Colors.blue)),
                   ],
                 );
               })
@@ -186,6 +207,28 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> buildErrorDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Erro"),
+          content: const Text("Ocorreu um erro, deseja tentar novamente?"),
+          actions: [
+            TextButton(
+              child: const Text("Tentar Novamente"),
+              onPressed: () {
+                loginController.hasError.value = false;
+                getAppData();
+                Get.back();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
