@@ -72,7 +72,7 @@ class MainController extends GetxController {
     }
   }
 
-  Future<void> incrementarQuantidadeConferida(String codigoItem) async {
+  Future<void> incrementarQuantidadeConferida(String codigoItem, {bool showMessage = true}) async {
     final itemPedido = itemsList.firstWhereOrNull(
       (item) => item.ITPD_ID == codigoItem,
     );
@@ -96,11 +96,12 @@ class MainController extends GetxController {
           itpdQtdConf: itemPedido.ITPD_QTD_CONFERIDO,
           usrsId: loginController.userLogged.value!.USRS_ID!));
 
-      print(itemsList);
     } else {
-      utils.showToast(
+      if(showMessage) {
+        utils.showToast(
           message: "Item não encontrado ou já totalmente conferido.",
           isError: true);
+      }
     }
 
     update();
@@ -123,6 +124,10 @@ class MainController extends GetxController {
 
     if(result) {
       utils.showToast(message: "Dados salvos com sucesso!", isError: false);
+
+      for (var itemModificado in itensModificados) {
+        itemsList.removeWhere((item) => item.ITPD_ID == itemModificado.itpdId);
+      }
 
       pedidoSelected.value = Pedido();
       itensModificados.clear();
@@ -149,8 +154,6 @@ class MainController extends GetxController {
     result.when(
       success: (list) {
         pedidos.value = list;
-
-        print(pedidos);
         update();
       },
       error: (error) {

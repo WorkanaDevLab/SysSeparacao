@@ -16,6 +16,8 @@ class CustomTextField extends StatefulWidget {
   final Function()? onTap;
   final String? Function(String?)? validator;
   final List<String>? autofillHints;
+  final Function(String)? onFieldSubmitted;
+
 
   CustomTextField({
     Key? key,
@@ -32,7 +34,8 @@ class CustomTextField extends StatefulWidget {
     this.maskFormatter,
     this.onTap,
     this.validator,
-    this.autofillHints
+    this.autofillHints,
+    this.onFieldSubmitted
   });
 
   @override
@@ -62,6 +65,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         enabled: widget.enabled,
         obscureText: isObscure,
         inputFormatters: widget.maskFormatter,
+        onFieldSubmitted: widget.onFieldSubmitted,
         onChanged: widget.onChanged,
         validator: widget.validator,
         decoration: InputDecoration(

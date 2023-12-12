@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutterbase/components/customtextfield.dart';
 import 'package:flutterbase/ui/login/controller/login_controller.dart';
@@ -20,6 +22,8 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<FormState> _globalKey = GlobalKey();
   final GlobalKey<FormState> _produtoKey = GlobalKey();
   Utils utils = Utils();
+
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -131,6 +135,23 @@ class _MainScreenState extends State<MainScreen> {
                             validator: (code) {
                               return null;
                             },
+                            onFieldSubmitted: (value) async {
+                              final existePedido = await mainController
+                                  .validateCode(codeController.text);
+
+                              if (existePedido?.PDDS_ID != null && existePedido?.PDDS_ID != "") {
+                                mainController.getItensPedidos(
+                                  pddsID: int.tryParse(existePedido!.PDDS_ID!)!,
+                                  setorID: int.tryParse(loginController
+                                      .setorLogged.value!.SETR_ID!)!,
+                                );
+                              } else {
+                                utils.showToast(
+                                    message:
+                                    "Pedido não encontrado. Verifique o código e tente novamente.",
+                                    isError: true);
+                              }
+                            },
                           )),
                       const SizedBox(
                         width: 8,
@@ -182,6 +203,14 @@ class _MainScreenState extends State<MainScreen> {
                                   return "Por favor, preencha o código do produto";
                                 }
                                 return null;
+                              },
+                              onFieldSubmitted: (value) {
+                                _debounce?.cancel();
+
+                                _debounce = Timer(const Duration(milliseconds: 500), () {
+                                  mainController.incrementarQuantidadeConferida(
+                                      produtoController.text, showMessage: false);
+                                });
                               },
                             )),
                         const SizedBox(

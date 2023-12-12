@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutterbase/network/interceptor.dart';
 
 abstract class HttpMethods {
   static const String post = "POST";
@@ -21,6 +22,8 @@ class HttpManager {
       });
 
     Dio dio = Dio();
+
+    dio.interceptors.add(CustomIntercetors());
 
     try {
       Response response = await dio.request(url,
