@@ -18,13 +18,6 @@ class MainController extends GetxController {
   TextEditingController selectedProdutoName = TextEditingController();
   TextEditingController selectedProdutoEndereco = TextEditingController();
 
-  @override
-  void onInit() {
-    super.onInit();
-    getPedidos(
-        unemID: int.tryParse(loginController.unemLogged.value!.unem_Id!)!);
-  }
-
   RxList<ItemPedido> itemsList = <ItemPedido>[].obs;
   RxBool isLoadingItens = false.obs;
 
@@ -38,21 +31,18 @@ class MainController extends GetxController {
   List<ItemLido> itensModificados = [];
 
   Future<Pedido?> validateCode(String? codigoPedido) async {
-    // Verifica se o código do pedido não foi informado
+
     if (codigoPedido == null || codigoPedido.isEmpty) {
-      // Se a lista de pedidos não estiver vazia, atribua o primeiro pedido
       if (pedidos.isNotEmpty) {
         pedidoSelected.value = pedidos.first;
         return pedidoSelected.value;
       } else {
-        // Se a lista de pedidos estiver vazia, retorna falso
         return Pedido();
       }
     }
 
-    // Continuação do código original para buscar pelo código
     final existePedido =
-    pedidos.where((pedido) => pedido.PDDS_ID == codigoPedido);
+    pedidos.where((pedido) => pedido.PDDS_CODIGO == codigoPedido);
 
     if (existePedido.isNotEmpty) {
       pedidoSelected.value = existePedido.first;
@@ -73,8 +63,13 @@ class MainController extends GetxController {
   }
 
   Future<void> incrementarQuantidadeConferida(String codigoItem, {bool showMessage = true}) async {
+
+    if (codigoItem.length > 12) {
+      codigoItem = codigoItem.substring(7, 12);
+    }
+
     final itemPedido = itemsList.firstWhereOrNull(
-      (item) => item.ITPD_ID == codigoItem,
+          (item) => item.PROD_CODIGO == codigoItem,
     );
 
     if (itemPedido != null) {
@@ -99,13 +94,14 @@ class MainController extends GetxController {
     } else {
       if(showMessage) {
         utils.showToast(
-          message: "Item não encontrado ou já totalmente conferido.",
-          isError: true);
+            message: "Item não encontrado ou já totalmente conferido.",
+            isError: true);
       }
     }
 
     update();
   }
+
 
   Future<void> postSaveItens() async {
 
@@ -146,27 +142,55 @@ class MainController extends GetxController {
     }
   }
 
-  Future<void> getPedidos({required int unemID}) async {
+  Future<void> getPedidos({required String codigoPedido}) async {
     isLoadingPedidos.value = true;
-    final ApiResult result = await _repository.getPedidos(unemID: unemID);
+
+    final ApiResult result = await _repository.getPedidos(unemID: loginController.unemLogged.value!.unem_Id!, codigoPedido: codigoPedido);
     isLoadingPedidos.value = false;
 
+    print("RESULTADO DOS PEDIDOS");
+    print(result);
+
     result.when(
-      success: (list) {
+      success: (list) async {
         pedidos.value = list;
-        update();
+
+        if (codigoPedido.isNotEmpty) {
+          Pedido? pedidoValidado = await validateCode(codigoPedido);
+          if (pedidoValidado != null && pedidoValidado.PDDS_ID != null) {
+            pedidoSelected.value = pedidoValidado;
+          } else {
+            utils.showToast(
+                message: "Código do pedido inválido ou não encontrado.",
+                isError: true);
+            return;
+          }
+        } else if (pedidos.isNotEmpty) {
+          pedidoSelected.value = pedidos.first;
+        } else {
+          pedidoSelected.value = Pedido();
+          utils.showToast(
+              message: "Nenhum pedido encontrado.",
+              isError: true);
+          return;
+        }
+
+        await getItensPedidos(pddsID: pedidoSelected.value!.PDDS_ID!, setorID: loginController.setorLogged.value!.SETR_ID!);
       },
       error: (error) {
+        isLoadingPedidos.value = false;
         utils.showToast(
-            message:
-                "Ocorreu um erro ao realizar a busca da lista de pedidos, tente novamente.",
+            message: "Ocorreu um erro ao realizar a busca da lista de pedidos, tente novamente.",
             isError: true);
       },
     );
+
+    update();
   }
 
+
   Future<void> getItensPedidos(
-      {required int pddsID, required int setorID}) async {
+      {required String pddsID, required String setorID}) async {
     isLoadingItens.value = true;
     final ApiResult result =
         await _repository.getItensPedidos(pddsID: pddsID, setorID: setorID);
@@ -175,7 +199,6 @@ class MainController extends GetxController {
     result.when(
       success: (list) {
         itemsList.value = list;
-        update();
       },
       error: (error) {
         utils.showToast(
@@ -184,5 +207,7 @@ class MainController extends GetxController {
             isError: true);
       },
     );
+
+    update();
   }
 }

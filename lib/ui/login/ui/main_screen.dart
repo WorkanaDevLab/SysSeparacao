@@ -109,7 +109,7 @@ class _MainScreenState extends State<MainScreen> {
                             color: Colors.blue,
                             fontWeight: FontWeight.bold),),
                         Text(logic.pedidoSelected.value!.PESS_FANTAZIA!),
-                        Text("PEDIDO: ${logic.pedidoSelected.value!.PDDS_ID!}"),
+                        Text("PEDIDO: ${logic.pedidoSelected.value!.PDDS_CODIGO!}"),
                       ],
                     ),
                   ),
@@ -136,21 +136,7 @@ class _MainScreenState extends State<MainScreen> {
                               return null;
                             },
                             onFieldSubmitted: (value) async {
-                              final existePedido = await mainController
-                                  .validateCode(codeController.text);
-
-                              if (existePedido?.PDDS_ID != null && existePedido?.PDDS_ID != "") {
-                                mainController.getItensPedidos(
-                                  pddsID: int.tryParse(existePedido!.PDDS_ID!)!,
-                                  setorID: int.tryParse(loginController
-                                      .setorLogged.value!.SETR_ID!)!,
-                                );
-                              } else {
-                                utils.showToast(
-                                    message:
-                                    "Pedido não encontrado. Verifique o código e tente novamente.",
-                                    isError: true);
-                              }
+                              await mainController.getPedidos(codigoPedido: codeController.text);
                             },
                           )),
                       const SizedBox(
@@ -160,21 +146,8 @@ class _MainScreenState extends State<MainScreen> {
                         return FloatingActionButton(
                           onPressed: () async {
                             if (_globalKey.currentState!.validate()) {
-                              final existePedido = await mainController
-                                  .validateCode(codeController.text);
+                              await mainController.getPedidos(codigoPedido: codeController.text);
 
-                              if (existePedido?.PDDS_ID != null && existePedido?.PDDS_ID != "") {
-                                mainController.getItensPedidos(
-                                  pddsID: int.tryParse(existePedido!.PDDS_ID!)!,
-                                  setorID: int.tryParse(loginController
-                                      .setorLogged.value!.SETR_ID!)!,
-                                );
-                              } else {
-                                utils.showToast(
-                                    message:
-                                    "Pedido não encontrado. Verifique o código e tente novamente.",
-                                    isError: true);
-                              }
                             }
                           },
                           child: const Icon(Icons.check),
@@ -384,7 +357,7 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Flexible(
                                 flex: 1,
-                                child: Center(child: Text(item.ITPD_ID!))),
+                                child: Center(child: Text(item.PROD_CODIGO!))),
                             Flexible(
                                 flex: 4,
                                 child: Column(

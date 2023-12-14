@@ -58,7 +58,7 @@ class MainRepository {
     }
   }
 
-  Future<ApiResult> getItensPedidos({required int pddsID, required int setorID}) async {
+  Future<ApiResult> getItensPedidos({required String pddsID, required String setorID}) async {
 
     String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
     String baseUrl = await _getBaseUrl();
@@ -81,13 +81,13 @@ class MainRepository {
     }
   }
 
-  Future<ApiResult> getPedidos({required int unemID}) async {
+  Future<ApiResult> getPedidos({required String unemID, required String codigoPedido}) async {
 
     String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
     String baseUrl = await _getBaseUrl();
 
     final result = await _httpManager.restRequest(
-      url: "$baseUrl/getPedidos?unemid=$unemID",
+      url: "$baseUrl/getPedidos?unemid=$unemID&pedido=$codigoPedido",
       method: HttpMethods.get,
       headers: {
         'Authorization': basicAuth,
