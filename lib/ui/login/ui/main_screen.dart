@@ -215,6 +215,7 @@ class _MainScreenState extends State<MainScreen> {
                                 _debounce = Timer(const Duration(milliseconds: 500), () {
                                   mainController.incrementarQuantidadeConferida(
                                       produtoController.text, showMessage: false);
+                                  produtoController.clear();
                                 });
                               },
                             )),
@@ -226,6 +227,7 @@ class _MainScreenState extends State<MainScreen> {
                             onPressed: () async {
                               mainController.incrementarQuantidadeConferida(
                                   produtoController.text);
+                              produtoController.clear();
                             },
                             child: const Icon(Icons.search),
                           );
