@@ -118,4 +118,36 @@ class MainRepository {
 
   }
 
+  Future<dynamic> setReiniciaConferencia({required String pddsID}) async {
+
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    String baseUrl = await _getBaseUrl();
+
+    final result = await _httpManager.restRequest(
+      url: "$baseUrl/setReiniciaConferencia?pddsid=$pddsID",
+      method: HttpMethods.post,
+      headers: {
+        'Authorization': basicAuth,
+      },
+    );
+
+    return result;
+  }
+
+  Future<dynamic> setCancelaConferencia({required String pddsID}) async {
+
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    String baseUrl = await _getBaseUrl();
+
+    final result = await _httpManager.restRequest(
+      url: "$baseUrl/setCancelaConferencia?pddsid=$pddsID",
+      method: HttpMethods.post,
+      headers: {
+        'Authorization': basicAuth,
+      },
+    );
+
+    return result;
+  }
+
 }

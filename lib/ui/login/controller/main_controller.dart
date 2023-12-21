@@ -31,7 +31,6 @@ class MainController extends GetxController {
   List<ItemLido> itensModificados = [];
 
   Future<Pedido?> validateCode(String? codigoPedido) async {
-
     if (codigoPedido == null || codigoPedido.isEmpty) {
       if (pedidos.isNotEmpty) {
         pedidoSelected.value = pedidos.first;
@@ -42,7 +41,7 @@ class MainController extends GetxController {
     }
 
     final existePedido =
-    pedidos.where((pedido) => pedido.PDDS_CODIGO == codigoPedido);
+        pedidos.where((pedido) => pedido.PDDS_CODIGO == codigoPedido);
 
     if (existePedido.isNotEmpty) {
       pedidoSelected.value = existePedido.first;
@@ -51,7 +50,6 @@ class MainController extends GetxController {
 
     return Pedido();
   }
-
 
   void adicionarOuAtualizarItemModificado(ItemLido item) {
     int index = itensModificados.indexWhere((it) => it.itpdId == item.itpdId);
@@ -62,14 +60,14 @@ class MainController extends GetxController {
     }
   }
 
-  Future<void> incrementarQuantidadeConferida(String codigoItem, {bool showMessage = true}) async {
-
+  Future<void> incrementarQuantidadeConferida(String codigoItem,
+      {bool showMessage = true}) async {
     if (codigoItem.length > 12) {
       codigoItem = codigoItem.substring(7, 12);
     }
 
     final itemPedido = itemsList.firstWhereOrNull(
-          (item) => item.PROD_CODIGO == codigoItem,
+      (item) => item.PROD_CODIGO == codigoItem,
     );
 
     if (itemPedido != null) {
@@ -90,9 +88,8 @@ class MainController extends GetxController {
           itpdId: itemPedido.ITPD_ID,
           itpdQtdConf: itemPedido.ITPD_QTD_CONFERIDO,
           usrsId: loginController.userLogged.value!.USRS_ID!));
-
     } else {
-      if(showMessage) {
+      if (showMessage) {
         utils.showToast(
             message: "Item não encontrado ou já totalmente conferido.",
             isError: true);
@@ -102,14 +99,10 @@ class MainController extends GetxController {
     update();
   }
 
-
   Future<void> postSaveItens() async {
-
-    if(itensModificados.isEmpty) {
+    if (itensModificados.isEmpty) {
       utils.showToast(
-          message:
-          "Nenhum item para sincronizar no momento.",
-          isError: true);
+          message: "Nenhum item para sincronizar no momento.", isError: true);
       return;
     }
 
@@ -118,7 +111,7 @@ class MainController extends GetxController {
         await _repository.setGravaConferencia(itens: itensModificados);
     isLoadingSyncItens.value = false;
 
-    if(result) {
+    if (result) {
       utils.showToast(message: "Dados salvos com sucesso!", isError: false);
 
       for (var itemModificado in itensModificados) {
@@ -133,11 +126,10 @@ class MainController extends GetxController {
       itemPedidoSelected.value = ItemPedido();
 
       update();
-
     } else {
       utils.showToast(
           message:
-          "Ocorreu um erro ao realizar ao gravar os dados, tente novamente.",
+              "Ocorreu um erro ao realizar ao gravar os dados, tente novamente.",
           isError: true);
     }
   }
@@ -145,7 +137,9 @@ class MainController extends GetxController {
   Future<void> getPedidos({required String codigoPedido}) async {
     isLoadingPedidos.value = true;
 
-    final ApiResult result = await _repository.getPedidos(unemID: loginController.unemLogged.value!.unem_Id!, codigoPedido: codigoPedido);
+    final ApiResult result = await _repository.getPedidos(
+        unemID: loginController.unemLogged.value!.unem_Id!,
+        codigoPedido: codigoPedido);
     isLoadingPedidos.value = false;
 
     print("RESULTADO DOS PEDIDOS");
@@ -169,25 +163,25 @@ class MainController extends GetxController {
           pedidoSelected.value = pedidos.first;
         } else {
           pedidoSelected.value = Pedido();
-          utils.showToast(
-              message: "Nenhum pedido encontrado.",
-              isError: true);
+          utils.showToast(message: "Nenhum pedido encontrado.", isError: true);
           return;
         }
 
-        await getItensPedidos(pddsID: pedidoSelected.value!.PDDS_ID!, setorID: loginController.setorLogged.value!.SETR_ID!);
+        await getItensPedidos(
+            pddsID: pedidoSelected.value!.PDDS_ID!,
+            setorID: loginController.setorLogged.value!.SETR_ID!);
       },
       error: (error) {
         isLoadingPedidos.value = false;
         utils.showToast(
-            message: "Ocorreu um erro ao realizar a busca da lista de pedidos, tente novamente.",
+            message:
+                "Ocorreu um erro ao realizar a busca da lista de pedidos, tente novamente.",
             isError: true);
       },
     );
 
     update();
   }
-
 
   Future<void> getItensPedidos(
       {required String pddsID, required String setorID}) async {
@@ -207,6 +201,53 @@ class MainController extends GetxController {
             isError: true);
       },
     );
+
+    update();
+  }
+
+  Future<void> setReiniciaConferencia({required String pddsID}) async {
+    isLoadingItens.value = true;
+    final dynamic result =
+        await _repository.setReiniciaConferencia(pddsID: pddsID);
+    isLoadingItens.value = false;
+
+    if (result != null) {
+
+      selectedProdutoName.text = "";
+      selectedProdutoEndereco.text = "";
+      itemPedidoSelected.value = ItemPedido();
+
+      await getItensPedidos(
+          pddsID: pedidoSelected.value!.PDDS_ID!,
+          setorID: loginController.setorLogged.value!.SETR_ID!);
+    } else {
+      utils.showToast(
+          message: "Erro ao reiniciar a conferência.", isError: true);
+    }
+
+    update();
+  }
+
+  Future<void> setCancelaConferencia({required String pddsID}) async {
+    isLoadingItens.value = true;
+    final dynamic result =
+        await _repository.setCancelaConferencia(pddsID: pddsID);
+    isLoadingItens.value = false;
+
+    print(result);
+    if (result != null) {
+      itemsList.clear();
+      pedidoSelected.value = Pedido();
+      selectedProdutoEndereco.text = "";
+      selectedProdutoName.text = "";
+      itemPedidoSelected.value = ItemPedido();
+
+      utils.showToast(
+          message: "Conferência cancelada com sucesso.", isError: false);
+    } else {
+      utils.showToast(
+          message: "Erro ao cancelar a conferência.", isError: true);
+    }
 
     update();
   }

@@ -38,6 +38,35 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             const UserAccountsDrawerHeader(
                 accountName: Text("SYS SEPARAÇÃO"), accountEmail: Text("")),
+            GetBuilder<MainController>(builder: (logic) {
+
+              if(logic.pedidoSelected.value != null && logic.pedidoSelected.value?.PDDS_ID != null && logic.pedidoSelected.value?.PDDS_ID != "") {
+                return Column(
+                  children: [
+                    ListTile(
+                      onTap: () async {
+                        await mainController.setReiniciaConferencia(pddsID: logic.pedidoSelected.value!.PDDS_ID!);
+                        produtoController.clear();
+
+                        Get.back();
+                      },
+                      title: const Text("Reiniciar conferência"),
+                    ),
+                    ListTile(
+                      onTap: () async {
+                        await mainController.setCancelaConferencia(pddsID: logic.pedidoSelected.value!.PDDS_ID!);
+                        Get.back();
+                      },
+                      title: const Text("Cancelar conferência"),
+                    ),
+                  ],
+                );
+              }
+
+              return Container();
+            }),
+
+
             ListTile(
               onTap: () async {
                 await loginController.logout();

@@ -184,8 +184,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             onTap: () {
                               if (_formKey.currentState!.validate()) {
                                 if (_selectedUsuario != null &&
-                                    _selectedUnidade != null &&
-                                    _selectedSetor != null) {
+                                    _selectedUnidade != null) {
+
+                                  _selectedSetor ??= _selectedSetor = Setor(SETR_ID: "0", SETR_NOME: "default");
                                   controller.signIn(
                                       password: passwordController.text.trim(),
                                       usuarioId: _selectedUsuario!.USRS_ID!,
