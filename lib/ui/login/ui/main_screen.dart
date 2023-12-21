@@ -46,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
                     ListTile(
                       onTap: () async {
                         await mainController.setReiniciaConferencia(pddsID: logic.pedidoSelected.value!.PDDS_ID!);
-                        produtoController.clear();
+                        clearControllers();
 
                         Get.back();
                       },
@@ -55,6 +55,7 @@ class _MainScreenState extends State<MainScreen> {
                     ListTile(
                       onTap: () async {
                         await mainController.setCancelaConferencia(pddsID: logic.pedidoSelected.value!.PDDS_ID!);
+                        clearControllers();
                         Get.back();
                       },
                       title: const Text("Cancelar conferência"),
@@ -161,6 +162,7 @@ class _MainScreenState extends State<MainScreen> {
                           child: CustomTextField(
                             controller: codeController,
                             labelText: "Informe o código do pedido",
+                            keyboardType: TextInputType.number,
                             validator: (code) {
                               return null;
                             },
@@ -200,6 +202,7 @@ class _MainScreenState extends State<MainScreen> {
                             child: CustomTextField(
                               controller: produtoController,
                               labelText: "Produto",
+                              keyboardType: TextInputType.number,
                               validator: (code) {
                                 if (code!.isEmpty) {
                                   return "Por favor, preencha o código do produto";
@@ -234,6 +237,7 @@ class _MainScreenState extends State<MainScreen> {
                             onPressed: () async {
                               utils.showconfirmDialog(context, () { Get.back(); }, () async {
                                 await mainController.postSaveItens();
+                                clearControllers();
                                 Get.back();
                               }, "Tem certeza que deseja salvar os itens modificados?");
 
@@ -433,5 +437,11 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
+  }
+
+  void clearControllers() {
+    produtoController.clear();
+    codeController.clear();
+    produtoController.clear();
   }
 }
