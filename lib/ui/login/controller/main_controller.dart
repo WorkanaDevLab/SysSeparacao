@@ -251,4 +251,38 @@ class MainController extends GetxController {
 
     update();
   }
+
+  Future<void> recarregarItensPedidos() async {
+    if (pedidoSelected.value?.PDDS_ID == null) {
+      return;
+    }
+
+    isLoadingItens.value = true;
+    final ApiResult result = await _repository.getItensPedidos(
+        pddsID: pedidoSelected.value!.PDDS_ID!,
+        setorID: loginController.setorLogged.value!.SETR_ID!);
+    isLoadingItens.value = false;
+
+    result.when(
+      success: (novosItens) {
+        for (var item in novosItens) {
+          int index = itemsList.indexWhere((it) => it.ITPD_ID == item.ITPD_ID);
+          if (index != -1) {
+            itemsList[index] = item;
+          } else {
+            itemsList.add(item);
+          }
+        }
+        utils.showToast(
+            message: "Itens carregados com sucesso.", isError: false);
+      },
+      error: (error) {
+        utils.showToast(
+            message: "Erro ao recarregar a lista de itens, tente novamente.", isError: true);
+      },
+    );
+
+    update();
+  }
+
 }

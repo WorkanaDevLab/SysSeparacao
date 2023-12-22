@@ -60,6 +60,13 @@ class _MainScreenState extends State<MainScreen> {
                       },
                       title: const Text("Cancelar conferência"),
                     ),
+                    ListTile(
+                      onTap: () async {
+                        await mainController.recarregarItensPedidos();
+                        Get.back();
+                      },
+                      title: const Text("Carregar códigos antigos"),
+                    ),
                   ],
                 );
               }
