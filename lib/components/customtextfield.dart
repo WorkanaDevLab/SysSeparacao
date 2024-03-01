@@ -9,7 +9,7 @@ class CustomTextField extends StatefulWidget {
   final bool? isPhone;
   final bool? enabled;
   final TextInputType? keyboardType;
-  final void Function(dynamic value)? onChanged;
+  final void Function(String value)? onChanged;
   final IconData? prefixIcon;
   final IconData? suffixIcon;
   final List<TextInputFormatter>? maskFormatter;

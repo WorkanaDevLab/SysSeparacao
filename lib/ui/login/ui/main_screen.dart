@@ -24,10 +24,18 @@ class _MainScreenState extends State<MainScreen> {
   Utils utils = Utils();
 
   Timer? _debounce;
+  Timer? _debounceCode;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void _onCodeChange(String value) {
+    _debounceCode?.cancel();
+    _debounceCode = Timer(const Duration(milliseconds: 200), () async {
+      await mainController.getPedidos(codigoPedido: codeController.text);
+    });
   }
 
   @override
@@ -173,6 +181,7 @@ class _MainScreenState extends State<MainScreen> {
                             validator: (code) {
                               return null;
                             },
+                            onChanged: _onCodeChange,
                             onFieldSubmitted: (value) async {
                               await mainController.getPedidos(codigoPedido: codeController.text);
                             },
@@ -215,6 +224,15 @@ class _MainScreenState extends State<MainScreen> {
                                   return "Por favor, preencha o código do produto";
                                 }
                                 return null;
+                              },
+                              onChanged: (value) {
+                                _debounce?.cancel();
+
+                                _debounce = Timer(const Duration(milliseconds: 500), () {
+                                  mainController.incrementarQuantidadeConferida(
+                                      produtoController.text, showMessage: false);
+                                  produtoController.clear();
+                                });
                               },
                               onFieldSubmitted: (value) {
                                 _debounce?.cancel();

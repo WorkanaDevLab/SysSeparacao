@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterbase/components/custombutton.dart';
 import 'package:flutterbase/components/customtextfield.dart';
 import 'package:flutterbase/constants.dart';
-import 'package:flutterbase/network/app_endpoints.dart';
 import 'package:flutterbase/utils.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class SettingsScreen extends StatefulWidget {
@@ -21,10 +19,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Utils utils = Utils();
 
   String? currentUrl;
+  bool isLoading = false;
 
   Future<bool> checkConnection(String url) async {
     try {
-      final response = await http.get(Uri.parse('$url/getUnidadesEmpresariais'));
+      final response = await http.get(Uri.parse(url));
 
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (e) {
@@ -70,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               CustomTextField(controller: urlController, labelText: "Digite a nova URL", validator: (url) {
                 if(url!.isEmpty) return "Preencha a URL.";
-                if(!url.isURL) return "Preencha uma URL válida";
+                //if(url.isURL) return "Preencha uma URL válida";
                 return null;
               },),
               const SizedBox(height: 8,),
@@ -80,8 +79,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 16,),
-              CustomButton(onTap: () async {
+              isLoading ? const Center(child: CircularProgressIndicator(),) : CustomButton(onTap: () async {
                 if(_globalKey.currentState!.validate()) {
+
+                  setState(() {
+                    isLoading = true;
+                  });
 
                   final newUrl = urlController.text;
                   final isConnectionSuccessful = await checkConnection(newUrl);
@@ -97,6 +100,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   } else {
                     utils.showToast(message: "Falha no teste de conexão com a URL inserida, verifique a URL e tente novamente.", isError: true);
                   }
+
+                  setState(() {
+                    isLoading = false;
+                  });
 
                 }
               }, buttonText: "Atualizar endereço", color: Colors.blue)
