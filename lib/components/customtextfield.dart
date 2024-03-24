@@ -17,6 +17,7 @@ class CustomTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final List<String>? autofillHints;
   final Function(String)? onFieldSubmitted;
+  final FocusNode? focusNode;
 
 
   CustomTextField({
@@ -35,7 +36,8 @@ class CustomTextField extends StatefulWidget {
     this.onTap,
     this.validator,
     this.autofillHints,
-    this.onFieldSubmitted
+    this.onFieldSubmitted,
+    this.focusNode
   });
 
   @override
@@ -58,6 +60,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0.0),
       child: TextFormField(
+        focusNode: widget.focusNode,
         autofillHints: widget.autofillHints,
         onTap: widget.onTap,
         keyboardType: widget.keyboardType,

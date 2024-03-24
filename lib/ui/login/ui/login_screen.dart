@@ -69,8 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              GetBuilder<LoginController>(
-                  builder: (controller) {
+              GetBuilder<LoginController>(builder: (controller) {
                 if (loginController.hasError.value) {
                   buildErrorDialog(context);
                 }
@@ -95,21 +94,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
-                  } else {
-                    return CustomDropdownUnidade(
-                      options: controller.unidades,
-                      onChanged: (selected) {
-                        setState(() {
-                          _selectedUnidade = controller.unidades.firstWhere(
-                              (un) => un.unem_Id == selected!.unem_Id,
-                              orElse: () => UnidadeEmpresarial());
-                          controller.getUsuarios(
-                              unemId: _selectedUnidade!.unem_Id!);
-                        });
-                      },
-                      selectedOption: _selectedUnidade,
-                    );
                   }
+
+                  if (controller.unidades.isEmpty) {
+                    return const Text("Sem dados disponíveis.");
+                  }
+
+                  return CustomDropdownUnidade(
+                    options: controller.unidades,
+                    onChanged: (selected) {
+                      setState(() {
+                        _selectedUnidade = controller.unidades.firstWhere(
+                            (un) => un.unem_Id == selected!.unem_Id,
+                            orElse: () => UnidadeEmpresarial());
+                        controller.getUsuarios(
+                            unemId: _selectedUnidade!.unem_Id!);
+                      });
+                    },
+                    selectedOption: _selectedUnidade,
+                  );
                 },
               ),
               const SizedBox(
@@ -121,19 +124,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
-                  } else {
-                    return CustomDropdownUsuario(
-                      options: controller.usuarios,
-                      onChanged: (selected) {
-                        setState(() {
-                          _selectedUsuario = controller.usuarios.firstWhere(
-                              (un) => un.USRS_ID == selected!.USRS_ID,
-                              orElse: () => Usuario());
-                        });
-                      },
-                      selectedOption: _selectedUsuario,
-                    );
                   }
+                  if (controller.usuarios.isEmpty) {
+                    return const Text("Sem dados disponíveis.");
+                  }
+                  return CustomDropdownUsuario(
+                    options: controller.usuarios,
+                    onChanged: (selected) {
+                      setState(() {
+                        _selectedUsuario = controller.usuarios.firstWhere(
+                            (un) => un.USRS_ID == selected!.USRS_ID,
+                            orElse: () => Usuario());
+                      });
+                    },
+                    selectedOption: _selectedUsuario,
+                  );
                 },
               ),
               const SizedBox(
@@ -145,19 +150,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
-                  } else {
-                    return CustomDropdownSetor(
-                      options: controller.setor,
-                      onChanged: (selected) {
-                        setState(() {
-                          _selectedSetor = controller.setor.firstWhere(
-                              (un) => un.SETR_ID == selected!.SETR_ID,
-                              orElse: () => Setor());
-                        });
-                      },
-                      selectedOption: _selectedSetor,
-                    );
                   }
+
+                  if (controller.setor.isEmpty) {
+                    return const Text("Sem dados disponíveis.");
+                  }
+
+                  return CustomDropdownSetor(
+                    options: controller.setor,
+                    onChanged: (selected) {
+                      setState(() {
+                        _selectedSetor = controller.setor.firstWhere(
+                            (un) => un.SETR_ID == selected!.SETR_ID,
+                            orElse: () => Setor());
+                      });
+                    },
+                    selectedOption: _selectedSetor,
+                  );
                 },
               ),
               const SizedBox(
@@ -185,8 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (_formKey.currentState!.validate()) {
                                 if (_selectedUsuario != null &&
                                     _selectedUnidade != null) {
-
-                                  _selectedSetor ??= _selectedSetor = Setor(SETR_ID: "0", SETR_NOME: "default");
+                                  _selectedSetor ??= _selectedSetor =
+                                      Setor(SETR_ID: "0", SETR_NOME: "default");
                                   controller.signIn(
                                       password: passwordController.text.trim(),
                                       usuarioId: _selectedUsuario!.USRS_ID!,

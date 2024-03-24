@@ -23,12 +23,22 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<FormState> _produtoKey = GlobalKey();
   Utils utils = Utils();
 
+  late FocusNode codeFocusNode = FocusNode();
+  late FocusNode productFocusNode = FocusNode();
+
   Timer? _debounce;
   Timer? _debounceCode;
 
   @override
   void initState() {
     super.initState();
+    codeFocusNode.requestFocus();
+  }
+
+  @override void dispose() {
+    super.dispose();
+    codeFocusNode.dispose();
+    productFocusNode.dispose();
   }
 
   void _onCodeChange(String value) {
@@ -94,7 +104,7 @@ class _MainScreenState extends State<MainScreen> {
               padding: EdgeInsets.all(8.0),
               child: Center(
                   child: Text(
-                    "versão 1.0.0",
+                    "versão 1.0.1",
                     style: TextStyle(color: Colors.grey),
                   )),
             )
@@ -175,6 +185,7 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       Expanded(
                           child: CustomTextField(
+                            focusNode: codeFocusNode,
                             controller: codeController,
                             labelText: "Informe o código do pedido",
                             keyboardType: TextInputType.number,
@@ -184,6 +195,7 @@ class _MainScreenState extends State<MainScreen> {
                             onChanged: _onCodeChange,
                             onFieldSubmitted: (value) async {
                               await mainController.getPedidos(codigoPedido: codeController.text);
+                              productFocusNode.requestFocus();
                             },
                           )),
                       const SizedBox(
@@ -194,7 +206,7 @@ class _MainScreenState extends State<MainScreen> {
                           onPressed: () async {
                             if (_globalKey.currentState!.validate()) {
                               await mainController.getPedidos(codigoPedido: codeController.text);
-
+                              productFocusNode.requestFocus();
                             }
                           },
                           child: const Icon(Icons.check),
@@ -216,6 +228,7 @@ class _MainScreenState extends State<MainScreen> {
                       children: [
                         Expanded(
                             child: CustomTextField(
+                              focusNode: productFocusNode,
                               controller: produtoController,
                               labelText: "Produto",
                               keyboardType: TextInputType.number,
@@ -225,22 +238,14 @@ class _MainScreenState extends State<MainScreen> {
                                 }
                                 return null;
                               },
-                              onChanged: (value) {
-                                _debounce?.cancel();
-
-                                _debounce = Timer(const Duration(milliseconds: 500), () {
-                                  mainController.incrementarQuantidadeConferida(
-                                      produtoController.text, showMessage: false);
-                                  produtoController.clear();
-                                });
-                              },
                               onFieldSubmitted: (value) {
                                 _debounce?.cancel();
 
                                 _debounce = Timer(const Duration(milliseconds: 500), () {
                                   mainController.incrementarQuantidadeConferida(
-                                      produtoController.text, showMessage: false);
+                                      produtoController.text, showMessage: true);
                                   produtoController.clear();
+                                  productFocusNode.requestFocus();
                                 });
                               },
                             )),
@@ -253,6 +258,7 @@ class _MainScreenState extends State<MainScreen> {
                               mainController.incrementarQuantidadeConferida(
                                   produtoController.text);
                               produtoController.clear();
+                              productFocusNode.requestFocus();
                             },
                             child: const Icon(Icons.search),
                           );
