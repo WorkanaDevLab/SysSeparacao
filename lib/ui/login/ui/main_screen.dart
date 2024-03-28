@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterbase/components/customtextfield.dart';
 import 'package:flutterbase/ui/login/controller/login_controller.dart';
 import 'package:flutterbase/ui/login/controller/main_controller.dart';
@@ -22,6 +23,8 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<FormState> _globalKey = GlobalKey();
   final GlobalKey<FormState> _produtoKey = GlobalKey();
   Utils utils = Utils();
+
+  TextInputType currentKeyboardType = TextInputType.number;
 
   late FocusNode codeFocusNode = FocusNode();
   late FocusNode productFocusNode = FocusNode();
@@ -231,7 +234,7 @@ class _MainScreenState extends State<MainScreen> {
                               focusNode: productFocusNode,
                               controller: produtoController,
                               labelText: "Produto",
-                              keyboardType: TextInputType.number,
+                              keyboardType: currentKeyboardType,
                               validator: (code) {
                                 if (code!.isEmpty) {
                                   return "Por favor, preencha o código do produto";
@@ -246,23 +249,45 @@ class _MainScreenState extends State<MainScreen> {
                                       produtoController.text, showMessage: true);
                                   produtoController.clear();
                                   productFocusNode.requestFocus();
+                                  SystemChannels.textInput.invokeMethod('TextInput.hide');
                                 });
                               },
                             )),
                         const SizedBox(
                           width: 8,
                         ),
+
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
                             onPressed: () async {
                               mainController.incrementarQuantidadeConferida(
                                   produtoController.text);
                               produtoController.clear();
+
+
+                              SystemChannels.textInput.invokeMethod('TextInput.hide');
                               productFocusNode.requestFocus();
                             },
                             child: const Icon(Icons.search),
                           );
                         }),
+                        const SizedBox(width: 8,),
+                        FloatingActionButton(onPressed: () {
+                          setState(() {
+                            if (currentKeyboardType == TextInputType.number) {
+                              currentKeyboardType = TextInputType.none;
+                            } else {
+                              currentKeyboardType = TextInputType.number;
+                            }
+
+                            if(productFocusNode.hasFocus) {
+                              productFocusNode.unfocus();
+                              Future.delayed(const Duration(milliseconds: 100), () {
+                                productFocusNode.requestFocus();
+                              });
+                            }
+                          });
+                        }, child: const Icon(Icons.keyboard), backgroundColor: currentKeyboardType == TextInputType.number ? Colors.green : Colors.grey,),
                         const SizedBox(width: 8,),
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
