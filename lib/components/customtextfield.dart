@@ -54,7 +54,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
     isObscure = widget.isSecret;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -71,7 +70,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
         onFieldSubmitted: widget.onFieldSubmitted,
         onChanged: widget.onChanged,
         validator: widget.validator,
-        showCursor: true,
         decoration: InputDecoration(
           labelText: widget.labelText,
           border: const OutlineInputBorder(

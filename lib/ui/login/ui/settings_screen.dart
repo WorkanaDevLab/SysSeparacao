@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutterbase/components/custombutton.dart';
 import 'package:flutterbase/components/customtextfield.dart';
@@ -14,6 +16,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
 
+
+  String username = 'hjsystems';
+  String password = '11032011';
+
   final GlobalKey<FormState> _globalKey = GlobalKey();
   TextEditingController urlController = TextEditingController();
   Utils utils = Utils();
@@ -23,7 +29,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<bool> checkConnection(String url) async {
     try {
-      final response = await http.get(Uri.parse(url));
+      String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+
+      final response = await http.get(Uri.parse(url),  headers: {
+        'Authorization': basicAuth,
+      },);
 
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (e) {
@@ -33,9 +43,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<String> getCurrentUrl() async {
     try {
-      return await utils.getLocalData(key: Constants.BASE_URL) ?? "http://52.4.98.235:9986";
+      return await utils.getLocalData(key: Constants.BASE_URL) ?? "http://45.191.204.61:8087";
     } catch (e) {
-      return "http://52.4.98.235:9986";
+      return "http://45.191.204.61:8087";
     }
   }
 
@@ -50,7 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         currentUrl = value;
       });
     }).catchError((e) {
-      currentUrl = "http://52.4.98.235:9986";
+      currentUrl = "http://45.191.204.61:8087";
     });
   }
 

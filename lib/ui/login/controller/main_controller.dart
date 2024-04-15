@@ -67,7 +67,11 @@ class MainController extends GetxController {
     }
 
     final itemPedido = itemsList.firstWhereOrNull(
-      (item) => item.PROD_CODIGO == codigoItem,
+          (item) => item.PROD_CODIGO == codigoItem ||
+          item.PROD_CODIGO1 == codigoItem ||
+          item.PROD_CODIGO2 == codigoItem ||
+          item.PROD_CODIGO3 == codigoItem ||
+          item.PROD_CODIGO4 == codigoItem,
     );
 
     if (itemPedido != null) {

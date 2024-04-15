@@ -69,12 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              GetBuilder<LoginController>(builder: (controller) {
-                if (loginController.hasError.value) {
-                  buildErrorDialog(context);
-                }
-                return Container();
-              }),
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
@@ -97,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
 
                   if (controller.unidades.isEmpty) {
-                    return const Text("Sem dados disponíveis.");
+                    return Container();
                   }
 
                   return CustomDropdownUnidade(
@@ -126,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   }
                   if (controller.usuarios.isEmpty) {
-                    return const Text("Sem dados disponíveis.");
+                    return Container();
                   }
                   return CustomDropdownUsuario(
                     options: controller.usuarios,
@@ -153,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
 
                   if (controller.setor.isEmpty) {
-                    return const Text("Sem dados disponíveis.");
+                    return Container();
                   }
 
                   return CustomDropdownSetor(

@@ -22,7 +22,7 @@ class MainRepository {
 
   Future<String> _getBaseUrl() async {
     String? baseUrl = await utils.getLocalData(key: Constants.BASE_URL);
-    return baseUrl ?? 'http://52.4.98.235:9986';
+    return baseUrl ?? 'http://45.191.204.61:8087';
   }
 
 

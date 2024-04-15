@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterbase/components/customtextfield.dart';
@@ -151,7 +150,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Column(
         children: [
-          //dados do pedido
           GetBuilder<MainController>(builder: (logic) {
 
             if(logic.pedidoSelected.value != null && logic.pedidoSelected.value?.PDDS_ID != null && logic.pedidoSelected.value?.PDDS_ID != "") {
@@ -160,12 +158,9 @@ class _MainScreenState extends State<MainScreen> {
                 child: Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Dados do Pedido", style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold),),
                         Text(logic.pedidoSelected.value!.PESS_FANTAZIA!),
                         Text("PEDIDO: ${logic.pedidoSelected.value!.PDDS_CODIGO!}"),
                       ],
@@ -287,7 +282,7 @@ class _MainScreenState extends State<MainScreen> {
                               });
                             }
                           });
-                        }, child: const Icon(Icons.keyboard), backgroundColor: currentKeyboardType == TextInputType.number ? Colors.green : Colors.grey,),
+                        }, backgroundColor: currentKeyboardType == TextInputType.number ? Colors.green : Colors.grey, child: const Icon(Icons.keyboard),),
                         const SizedBox(width: 8,),
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
@@ -305,67 +300,70 @@ class _MainScreenState extends State<MainScreen> {
                         })
                       ],
                     ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    CustomTextField(
-                      enabled: false,
-                      controller: logic.selectedProdutoName,
-                      labelText: "Produto",
-                      validator: (code) {
-                        if (code!.isEmpty) {
-                          return "Por favor, preencha o código do produto";
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
+                    const Divider(),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: CustomTextField(
-                            enabled: false,
-                            controller: logic.selectedProdutoEndereco,
-                            labelText: "Endereço",
-                            validator: (code) {
-                              if (code!.isEmpty) {
-                                return "Por favor, preencha o código do produto";
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Separar",
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold),
+                            Row(
+                              children: [
+                                const Text(
+                                  "Produto: ",
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(logic.selectedProdutoName.text),
+                              ],
                             ),
-                            logic.itemPedidoSelected.value.ITPD_QTDE != null ? Text(logic.itemPedidoSelected.value.ITPD_QTDE!) : const Text("0"),
+                            Row(
+                              children: [
+                                const Text(
+                                  "Endereço: ",
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(logic.selectedProdutoEndereco.text),
+                              ],
+                            ),
                           ],
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Conferida",
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold),
+                            Row(
+                              children: [
+                                const Text(
+                                  "Separar: ",
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                logic.itemPedidoSelected.value.ITPD_QTDE != null ? Text(logic.itemPedidoSelected.value.ITPD_QTDE!) : const Text("0"),
+                              ],
                             ),
-                            logic.itemPedidoSelected.value.ITPD_QTD_CONFERIDO != null ?  Text(
-                                logic.itemPedidoSelected.value.ITPD_QTD_CONFERIDO!) : const Text("0"),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Row(
+                              children: [
+                                const Text(
+                                  "Conferida: ",
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                logic.itemPedidoSelected.value.ITPD_QTD_CONFERIDO != null ?  Text(
+                                    logic.itemPedidoSelected.value.ITPD_QTD_CONFERIDO!) : const Text("0"),
+                              ],
+                            ),
                           ],
-                        ),
+                        )
+
+
                       ],
                     ),
                   ],
@@ -374,30 +372,18 @@ class _MainScreenState extends State<MainScreen> {
             );
           }),
           const Divider(),
-          const Text(
-            "Itens do Pedido",
-            style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blue),
-          ),
-          const SizedBox(
-            height: 8,
-          ),
+
           const Row(
             children: [
               Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            "Código",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "do produto",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          "Código do produto",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ))),
               Expanded(
                   flex: 4,
@@ -447,7 +433,7 @@ class _MainScreenState extends State<MainScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Flexible(
-                                flex: 1,
+                                flex: 2,
                                 child: Center(child: Text(item.PROD_CODIGO!))),
                             Flexible(
                                 flex: 4,
