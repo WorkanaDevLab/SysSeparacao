@@ -139,7 +139,7 @@ class MainController extends GetxController {
     } else {
       utils.showToast(
           message:
-              "Ocorreu um erro ao realizar ao gravar os dados, tente novamente.",
+              "Ocorreu um erro ao gravar os dados, tente novamente.",
           isError: true);
     }
   }

@@ -31,13 +31,16 @@ class _MainScreenState extends State<MainScreen> {
   Timer? _debounce;
   Timer? _debounceCode;
 
+  bool isSaving = false;
+
   @override
   void initState() {
     super.initState();
     codeFocusNode.requestFocus();
   }
 
-  @override void dispose() {
+  @override
+  void dispose() {
     super.dispose();
     codeFocusNode.dispose();
     productFocusNode.dispose();
@@ -50,6 +53,25 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future<void> _saveItems() async {
+    if (isSaving) return;
+
+    setState(() {
+      isSaving = true;
+    });
+
+    try {
+      await mainController.postSaveItens();
+      clearControllers();
+    } catch (e) {
+      // Handle error if needed
+    } finally {
+      setState(() {
+        isSaving = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,13 +81,15 @@ class _MainScreenState extends State<MainScreen> {
             const UserAccountsDrawerHeader(
                 accountName: Text("SYS SEPARAÇÃO"), accountEmail: Text("")),
             GetBuilder<MainController>(builder: (logic) {
-
-              if(logic.pedidoSelected.value != null && logic.pedidoSelected.value?.PDDS_ID != null && logic.pedidoSelected.value?.PDDS_ID != "") {
+              if (logic.pedidoSelected.value != null &&
+                  logic.pedidoSelected.value?.PDDS_ID != null &&
+                  logic.pedidoSelected.value?.PDDS_ID != "") {
                 return Column(
                   children: [
                     ListTile(
                       onTap: () async {
-                        await mainController.setReiniciaConferencia(pddsID: logic.pedidoSelected.value!.PDDS_ID!);
+                        await mainController.setReiniciaConferencia(
+                            pddsID: logic.pedidoSelected.value!.PDDS_ID!);
                         clearControllers();
 
                         Get.back();
@@ -74,7 +98,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     ListTile(
                       onTap: () async {
-                        await mainController.setCancelaConferencia(pddsID: logic.pedidoSelected.value!.PDDS_ID!);
+                        await mainController.setCancelaConferencia(
+                            pddsID: logic.pedidoSelected.value!.PDDS_ID!);
                         clearControllers();
                         Get.back();
                       },
@@ -93,8 +118,6 @@ class _MainScreenState extends State<MainScreen> {
 
               return Container();
             }),
-
-
             ListTile(
               onTap: () async {
                 await loginController.logout();
@@ -127,8 +150,8 @@ class _MainScreenState extends State<MainScreen> {
               );
             }
 
-            int index = controller.itemsList.indexOf(
-                controller.itemPedidoSelected.value);
+            int index = controller.itemsList
+                .indexOf(controller.itemPedidoSelected.value);
 
             if (index == -1) {
               return const Center(
@@ -151,8 +174,9 @@ class _MainScreenState extends State<MainScreen> {
       body: Column(
         children: [
           GetBuilder<MainController>(builder: (logic) {
-
-            if(logic.pedidoSelected.value != null && logic.pedidoSelected.value?.PDDS_ID != null && logic.pedidoSelected.value?.PDDS_ID != "") {
+            if (logic.pedidoSelected.value != null &&
+                logic.pedidoSelected.value?.PDDS_ID != null &&
+                logic.pedidoSelected.value?.PDDS_ID != "") {
               return Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Card(
@@ -162,7 +186,8 @@ class _MainScreenState extends State<MainScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(logic.pedidoSelected.value!.PESS_FANTAZIA!),
-                        Text("PEDIDO: ${logic.pedidoSelected.value!.PDDS_CODIGO!}"),
+                        Text(
+                            "PEDIDO: ${logic.pedidoSelected.value!.PDDS_CODIGO!}"),
                       ],
                     ),
                   ),
@@ -172,7 +197,6 @@ class _MainScreenState extends State<MainScreen> {
 
             return Container();
           }),
-
           GetBuilder<MainController>(builder: (logic) {
             if (logic.itemsList.isEmpty) {
               return Padding(
@@ -192,7 +216,8 @@ class _MainScreenState extends State<MainScreen> {
                             },
                             onChanged: _onCodeChange,
                             onFieldSubmitted: (value) async {
-                              await mainController.getPedidos(codigoPedido: codeController.text);
+                              await mainController.getPedidos(
+                                  codigoPedido: codeController.text);
                               productFocusNode.requestFocus();
                             },
                           )),
@@ -203,7 +228,8 @@ class _MainScreenState extends State<MainScreen> {
                         return FloatingActionButton(
                           onPressed: () async {
                             if (_globalKey.currentState!.validate()) {
-                              await mainController.getPedidos(codigoPedido: codeController.text);
+                              await mainController.getPedidos(
+                                  codigoPedido: codeController.text);
                               productFocusNode.requestFocus();
                             }
                           },
@@ -239,19 +265,21 @@ class _MainScreenState extends State<MainScreen> {
                               onFieldSubmitted: (value) {
                                 _debounce?.cancel();
 
-                                _debounce = Timer(const Duration(milliseconds: 500), () {
-                                  mainController.incrementarQuantidadeConferida(
-                                      produtoController.text, showMessage: true);
-                                  produtoController.clear();
-                                  productFocusNode.requestFocus();
-                                  SystemChannels.textInput.invokeMethod('TextInput.hide');
-                                });
+                                _debounce = Timer(const Duration(milliseconds: 500),
+                                        () {
+                                      mainController.incrementarQuantidadeConferida(
+                                          produtoController.text,
+                                          showMessage: true);
+                                      produtoController.clear();
+                                      productFocusNode.requestFocus();
+                                      SystemChannels.textInput
+                                          .invokeMethod('TextInput.hide');
+                                    });
                               },
                             )),
                         const SizedBox(
                           width: 8,
                         ),
-
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
                             onPressed: () async {
@@ -259,43 +287,52 @@ class _MainScreenState extends State<MainScreen> {
                                   produtoController.text);
                               produtoController.clear();
 
-
-                              SystemChannels.textInput.invokeMethod('TextInput.hide');
+                              SystemChannels.textInput
+                                  .invokeMethod('TextInput.hide');
                               productFocusNode.requestFocus();
                             },
                             child: const Icon(Icons.search),
                           );
                         }),
-                        const SizedBox(width: 8,),
-                        FloatingActionButton(onPressed: () {
-                          setState(() {
-                            if (currentKeyboardType == TextInputType.number) {
-                              currentKeyboardType = TextInputType.none;
-                            } else {
-                              currentKeyboardType = TextInputType.number;
-                            }
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        FloatingActionButton(
+                          onPressed: () {
+                            setState(() {
+                              if (currentKeyboardType ==
+                                  TextInputType.number) {
+                                currentKeyboardType = TextInputType.none;
+                              } else {
+                                currentKeyboardType = TextInputType.number;
+                              }
 
-                            if(productFocusNode.hasFocus) {
-                              productFocusNode.unfocus();
-                              Future.delayed(const Duration(milliseconds: 100), () {
-                                productFocusNode.requestFocus();
-                              });
-                            }
-                          });
-                        }, backgroundColor: currentKeyboardType == TextInputType.number ? Colors.green : Colors.grey, child: const Icon(Icons.keyboard),),
-                        const SizedBox(width: 8,),
+                              if (productFocusNode.hasFocus) {
+                                productFocusNode.unfocus();
+                                Future.delayed(const Duration(milliseconds: 100),
+                                        () {
+                                      productFocusNode.requestFocus();
+                                    });
+                              }
+                            });
+                          },
+                          backgroundColor:
+                          currentKeyboardType == TextInputType.number
+                              ? Colors.green
+                              : Colors.grey,
+                          child: const Icon(Icons.keyboard),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
                             backgroundColor: Colors.green,
-                            onPressed: () async {
-                              utils.showconfirmDialog(context, () { Get.back(); }, () async {
-                                await mainController.postSaveItens();
-                                clearControllers();
-                                Get.back();
-                              }, "Tem certeza que deseja salvar os itens modificados?");
-
-                            },
-                            child: const Icon(Icons.save),
+                            onPressed: isSaving ? null : _saveItems,
+                            child: isSaving
+                                ? const CircularProgressIndicator(
+                                color: Colors.white)
+                                : const Icon(Icons.save),
                           );
                         })
                       ],
@@ -342,7 +379,10 @@ class _MainScreenState extends State<MainScreen> {
                                       color: Colors.blue,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                logic.itemPedidoSelected.value.ITPD_QTDE != null ? Text(logic.itemPedidoSelected.value.ITPD_QTDE!) : const Text("0"),
+                                logic.itemPedidoSelected.value.ITPD_QTDE != null
+                                    ? Text(logic.itemPedidoSelected.value
+                                    .ITPD_QTDE!)
+                                    : const Text("0"),
                               ],
                             ),
                             const SizedBox(
@@ -356,14 +396,16 @@ class _MainScreenState extends State<MainScreen> {
                                       color: Colors.blue,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                logic.itemPedidoSelected.value.ITPD_QTD_CONFERIDO != null ?  Text(
-                                    logic.itemPedidoSelected.value.ITPD_QTD_CONFERIDO!) : const Text("0"),
+                                logic.itemPedidoSelected.value
+                                    .ITPD_QTD_CONFERIDO !=
+                                    null
+                                    ? Text(logic.itemPedidoSelected.value
+                                    .ITPD_QTD_CONFERIDO!)
+                                    : const Text("0"),
                               ],
                             ),
                           ],
                         )
-
-
                       ],
                     ),
                   ],
@@ -372,7 +414,6 @@ class _MainScreenState extends State<MainScreen> {
             );
           }),
           const Divider(),
-
           const Row(
             children: [
               Expanded(
@@ -455,16 +496,13 @@ class _MainScreenState extends State<MainScreen> {
                                           children: [
                                             Center(
                                                 child: Text(
-                                                    "Qntd: ${item.ITPD_QTDE!
-                                                        .toString()}")),
+                                                    "Qntd: ${item.ITPD_QTDE!.toString()}")),
                                             const SizedBox(
                                               width: 4,
                                             ),
                                             Center(
                                                 child: Text(
-                                                    "Conferido: ${item
-                                                        .ITPD_QTD_CONFERIDO!
-                                                        .toString()}")),
+                                                    "Conferido: ${item.ITPD_QTD_CONFERIDO!.toString()}")),
                                           ],
                                         )
                                       ],
