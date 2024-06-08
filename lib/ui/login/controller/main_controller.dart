@@ -66,6 +66,7 @@ class MainController extends GetxController {
       codigoItem = codigoItem.substring(7, 12);
     }
 
+    /*
     final itemPedido = itemsList.firstWhereOrNull(
           (item) => item.PROD_CODIGO == codigoItem ||
           item.PROD_CODIGO1 == codigoItem ||
@@ -73,24 +74,29 @@ class MainController extends GetxController {
           item.PROD_CODIGO3 == codigoItem ||
           item.PROD_CODIGO4 == codigoItem,
     );
+     */
 
-    if (itemPedido != null) {
-      itemPedidoSelected.value = itemPedido;
-      selectedProdutoName.text = itemPedidoSelected.value.PROD_NOME!;
-      selectedProdutoEndereco.text = itemPedidoSelected.value.PROD_ENDERECO!;
-    }
+    // Find all items with the same product code
+    List<ItemPedido> itemsWithSameCode = itemsList.where((item) => item.PROD_CODIGO == codigoItem).toList();
 
-    if (itemPedido != null &&
-        int.tryParse(itemPedido.ITPD_QTD_CONFERIDO!)! <
-            int.tryParse(itemPedido.ITPD_QTDE!)!) {
-      itemPedido.ITPD_QTD_CONFERIDO =
-          (int.tryParse(itemPedido.ITPD_QTD_CONFERIDO!)! + 1).toString();
+    // Check if any of the items with the same code have not been fully conferred
+    bool anyItemNotFullyConferred = itemsWithSameCode.any((item) => int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
 
-      int index = itemsList.indexOf(itemPedido);
-      itemsList[index] = itemPedido;
+    if (anyItemNotFullyConferred) {
+      // Find the first item with the same code that has not been fully conferred
+      ItemPedido itemToIncrement = itemsWithSameCode.firstWhere((item) => int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
+
+      // Increment the quantity conferred for the selected item
+      itemToIncrement.ITPD_QTD_CONFERIDO = (int.tryParse(itemToIncrement.ITPD_QTD_CONFERIDO!)! + 1).toString();
+
+      // Update the item in the list
+      int index = itemsList.indexOf(itemToIncrement);
+      itemsList[index] = itemToIncrement;
+
+      // Add the modified item to the list of modified items
       adicionarOuAtualizarItemModificado(ItemLido(
-          itpdId: itemPedido.ITPD_ID,
-          itpdQtdConf: itemPedido.ITPD_QTD_CONFERIDO,
+          itpdId: itemToIncrement.ITPD_ID,
+          itpdQtdConf: itemToIncrement.ITPD_QTD_CONFERIDO,
           usrsId: loginController.userLogged.value!.USRS_ID!));
     } else {
       if (showMessage) {

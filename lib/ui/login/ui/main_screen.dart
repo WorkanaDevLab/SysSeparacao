@@ -45,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _onCodeChange(String value) {
     _debounceCode?.cancel();
-    _debounceCode = Timer(const Duration(milliseconds: 200), () async {
+    _debounceCode = Timer(const Duration(milliseconds: 500), () async {
       await mainController.getPedidos(codigoPedido: codeController.text);
     });
   }
@@ -106,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
               padding: EdgeInsets.all(8.0),
               child: Center(
                   child: Text(
-                    "versão 1.0.1",
+                    "versão 1.0.5",
                     style: TextStyle(color: Colors.grey),
                   )),
             )
