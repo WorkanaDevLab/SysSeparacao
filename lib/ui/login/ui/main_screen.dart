@@ -129,7 +129,7 @@ class _MainScreenState extends State<MainScreen> {
               padding: EdgeInsets.all(8.0),
               child: Center(
                   child: Text(
-                    "versão 1.0.5",
+                    "versão 1.0.6",
                     style: TextStyle(color: Colors.grey),
                   )),
             )
