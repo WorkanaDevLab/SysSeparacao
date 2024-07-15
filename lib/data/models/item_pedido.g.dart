@@ -19,6 +19,7 @@ ItemPedido _$ItemPedidoFromJson(Map<String, dynamic> json) => ItemPedido(
       PROD_NOME: json['PROD_NOME'] as String?,
       PROD_ENDERECO: json['PROD_ENDERECO'] as String?,
       SETR_NOME: json['SETR_NOME'] as String?,
+      ITPD_EDICAO: json['ITPD_EDICAO'] as bool?,
     );
 
 Map<String, dynamic> _$ItemPedidoToJson(ItemPedido instance) =>
@@ -35,4 +36,5 @@ Map<String, dynamic> _$ItemPedidoToJson(ItemPedido instance) =>
       'PROD_NOME': instance.PROD_NOME,
       'PROD_ENDERECO': instance.PROD_ENDERECO,
       'SETR_NOME': instance.SETR_NOME,
+      'ITPD_EDICAO': instance.ITPD_EDICAO,
     };

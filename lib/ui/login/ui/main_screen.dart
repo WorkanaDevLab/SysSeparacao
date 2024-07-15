@@ -50,6 +50,17 @@ class _MainScreenState extends State<MainScreen> {
     _debounceCode?.cancel();
     _debounceCode = Timer(const Duration(milliseconds: 500), () async {
       await mainController.getPedidos(codigoPedido: codeController.text);
+      productFocusNode.requestFocus();
+    });
+  }
+
+  Future<void> _onProductSubmitted(String value) async {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      await mainController.incrementarQuantidadeConferida(produtoController.text);
+      produtoController.clear();
+      productFocusNode.requestFocus();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
     });
   }
 
@@ -129,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
               padding: EdgeInsets.all(8.0),
               child: Center(
                   child: Text(
-                    "versão 1.0.6",
+                    "versão 1.0.7",
                     style: TextStyle(color: Colors.grey),
                   )),
             )
@@ -262,20 +273,7 @@ class _MainScreenState extends State<MainScreen> {
                                 }
                                 return null;
                               },
-                              onFieldSubmitted: (value) {
-                                _debounce?.cancel();
-
-                                _debounce = Timer(const Duration(milliseconds: 500),
-                                        () {
-                                      mainController.incrementarQuantidadeConferida(
-                                          produtoController.text,
-                                          showMessage: true);
-                                      produtoController.clear();
-                                      productFocusNode.requestFocus();
-                                      SystemChannels.textInput
-                                          .invokeMethod('TextInput.hide');
-                                    });
-                              },
+                              onFieldSubmitted: _onProductSubmitted,
                             )),
                         const SizedBox(
                           width: 8,
@@ -283,13 +281,7 @@ class _MainScreenState extends State<MainScreen> {
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
                             onPressed: () async {
-                              mainController.incrementarQuantidadeConferida(
-                                  produtoController.text);
-                              produtoController.clear();
-
-                              SystemChannels.textInput
-                                  .invokeMethod('TextInput.hide');
-                              productFocusNode.requestFocus();
+                              await _onProductSubmitted(produtoController.text);
                             },
                             child: const Icon(Icons.search),
                           );
@@ -309,10 +301,10 @@ class _MainScreenState extends State<MainScreen> {
 
                               if (productFocusNode.hasFocus) {
                                 productFocusNode.unfocus();
-                                Future.delayed(const Duration(milliseconds: 100),
-                                        () {
-                                      productFocusNode.requestFocus();
-                                    });
+                                Future.delayed(
+                                    const Duration(milliseconds: 100), () {
+                                  productFocusNode.requestFocus();
+                                });
                               }
                             });
                           },
@@ -325,6 +317,7 @@ class _MainScreenState extends State<MainScreen> {
                         const SizedBox(
                           width: 8,
                         ),
+
                         GetBuilder<MainController>(builder: (logic) {
                           return FloatingActionButton(
                             backgroundColor: Colors.green,
@@ -332,82 +325,12 @@ class _MainScreenState extends State<MainScreen> {
                             child: isSaving
                                 ? const CircularProgressIndicator(
                                 color: Colors.white)
-                                : const Icon(Icons.save),
+                                : const Icon(Icons.check),
                           );
                         })
                       ],
                     ),
                     const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  "Produto: ",
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(logic.selectedProdutoName.text),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                const Text(
-                                  "Endereço: ",
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(logic.selectedProdutoEndereco.text),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  "Separar: ",
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                logic.itemPedidoSelected.value.ITPD_QTDE != null
-                                    ? Text(logic.itemPedidoSelected.value
-                                    .ITPD_QTDE!)
-                                    : const Text("0"),
-                              ],
-                            ),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Row(
-                              children: [
-                                const Text(
-                                  "Conferida: ",
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                logic.itemPedidoSelected.value
-                                    .ITPD_QTD_CONFERIDO !=
-                                    null
-                                    ? Text(logic.itemPedidoSelected.value
-                                    .ITPD_QTD_CONFERIDO!)
-                                    : const Text("0"),
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -417,22 +340,21 @@ class _MainScreenState extends State<MainScreen> {
           const Row(
             children: [
               Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          "Código do produto",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          "Código",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                       ))),
               Expanded(
                   flex: 4,
-                  child: Center(
-                      child: Text(
-                        "Nome",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ))),
+                  child: Text(
+                    "Nome",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  )),
             ],
           ),
           GetBuilder<MainController>(builder: (controller) {
@@ -464,52 +386,72 @@ class _MainScreenState extends State<MainScreen> {
                     Color? cardColor =
                     (item.ITPD_QTD_CONFERIDO == item.ITPD_QTDE)
                         ? Colors.green[100]
-                        : Colors.white;
+                        : (item.ITPD_EDICAO == true) ? Colors.red : Colors.white;
 
-                    return Card(
-                      color: cardColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                                flex: 2,
-                                child: Center(child: Text(item.PROD_CODIGO!))),
-                            Flexible(
-                                flex: 4,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.PROD_NOME!.trim(),
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(item.PROD_ENDERECO!.trim()),
-                                        Row(
-                                          children: [
-                                            Center(
-                                                child: Text(
-                                                    "Qntd: ${item.ITPD_QTDE!.toString()}")),
-                                            const SizedBox(
-                                              width: 4,
-                                            ),
-                                            Center(
-                                                child: Text(
-                                                    "Conferido: ${item.ITPD_QTD_CONFERIDO!.toString()}")),
-                                          ],
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                )),
-                          ],
+                    return GestureDetector(
+                      onLongPress: () {
+                        mainController.marcarItemComoEdicao(item.ITPD_ID!);
+                      },
+                      child: Card(
+                        color: cardColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                  flex: 1,
+                                  child: Center(
+                                      child: Text(
+                                        item.PROD_CODIGO!,
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ))),
+                              Flexible(
+                                  flex: 4,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.PROD_NOME!.trim(),
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(
+                                        height: 4,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(item.PROD_ENDERECO!.trim()),
+                                          Row(
+                                            children: [
+                                              const Text(
+                                                "Qntd: ",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                              Text(item.ITPD_QTDE!.toString()),
+                                              const SizedBox(
+                                                width: 4,
+                                              ),
+                                              const Text(
+                                                "Conferido: ",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.bold),
+                                              ),
+                                              Text(item.ITPD_QTD_CONFERIDO!
+                                                  .toString()),
+                                            ],
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  )),
+                            ],
+                          ),
                         ),
                       ),
                     );

@@ -16,6 +16,7 @@ class ItemPedido {
   String? PROD_NOME;
   String? PROD_ENDERECO;
   String? SETR_NOME;
+  bool? ITPD_EDICAO;
 
   ItemPedido(
       {this.ITPD_ID,
@@ -29,7 +30,9 @@ class ItemPedido {
         this.PROD_CODIGO4,
         this.PROD_NOME,
         this.PROD_ENDERECO,
-        this.SETR_NOME});
+        this.SETR_NOME,
+        this.ITPD_EDICAO
+      });
 
   factory ItemPedido.fromJson(Map<String, dynamic> json) => _$ItemPedidoFromJson(json);
 
@@ -37,6 +40,7 @@ class ItemPedido {
 
   @override
   String toString() {
-    return 'ItemPedido{ITPD_ID: $ITPD_ID, ITPD_QTDE: $ITPD_QTDE, ITPD_QTD_CONFERIDO: $ITPD_QTD_CONFERIDO, PROD_ID: $PROD_ID, PROD_CODIGO: $PROD_CODIGO, PROD_CODIGO1: $PROD_CODIGO1, PROD_CODIGO2: $PROD_CODIGO2, PROD_CODIGO3: $PROD_CODIGO3, PROD_CODIGO4: $PROD_CODIGO4, PROD_NOME: $PROD_NOME, PROD_ENDERECO: $PROD_ENDERECO, SETR_NOME: $SETR_NOME}';
+    return 'ItemPedido{ITPD_ID: $ITPD_ID, ITPD_QTDE: $ITPD_QTDE, ITPD_QTD_CONFERIDO: $ITPD_QTD_CONFERIDO, PROD_ID: $PROD_ID, PROD_CODIGO: $PROD_CODIGO, PROD_CODIGO1: $PROD_CODIGO1, PROD_CODIGO2: $PROD_CODIGO2, PROD_CODIGO3: $PROD_CODIGO3, PROD_CODIGO4: $PROD_CODIGO4, PROD_NOME: $PROD_NOME, PROD_ENDERECO: $PROD_ENDERECO, SETR_NOME: $SETR_NOME, ITPD_EDICAO: $ITPD_EDICAO}';
   }
+
 }

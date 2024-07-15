@@ -41,7 +41,7 @@ class MainController extends GetxController {
     }
 
     final existePedido =
-        pedidos.where((pedido) => pedido.PDDS_CODIGO == codigoPedido);
+    pedidos.where((pedido) => pedido.PDDS_CODIGO == codigoPedido);
 
     if (existePedido.isNotEmpty) {
       pedidoSelected.value = existePedido.first;
@@ -60,44 +60,61 @@ class MainController extends GetxController {
     }
   }
 
+  void marcarItemComoEdicao(String itemId) {
+    int indexItemsList = itemsList.indexWhere((item) => item.ITPD_ID == itemId);
+    if (indexItemsList != -1) {
+      var item = itemsList[indexItemsList];
+      item.ITPD_EDICAO = !(item.ITPD_EDICAO ?? false);
+      itemsList[indexItemsList] = item;
+    }
+
+    int indexItensModificados = itensModificados.indexWhere((it) => it.itpdId == itemId);
+    if (indexItensModificados != -1) {
+      var item = itensModificados[indexItensModificados];
+      item.edicao = !(item.edicao ?? false);
+      item.itpdQtdConf = itemsList.firstWhere((it) => it.ITPD_ID == itemId).ITPD_QTD_CONFERIDO;
+      item.usrsId = loginController.userLogged.value!.USRS_ID!;
+      itensModificados[indexItensModificados] = item;
+    } else {
+      var itemFromList = itemsList.firstWhere((it) => it.ITPD_ID == itemId);
+      itensModificados.add(ItemLido(
+        itpdId: itemId,
+        edicao: true,
+        itpdQtdConf: itemFromList.ITPD_QTD_CONFERIDO,
+        usrsId: loginController.userLogged.value!.USRS_ID!,
+      ));
+    }
+
+    update();
+  }
+
   Future<void> incrementarQuantidadeConferida(String codigoItem,
       {bool showMessage = true}) async {
     if (codigoItem.length > 12) {
       codigoItem = codigoItem.substring(7, 12);
     }
 
-    /*
-    final itemPedido = itemsList.firstWhereOrNull(
-          (item) => item.PROD_CODIGO == codigoItem ||
-          item.PROD_CODIGO1 == codigoItem ||
-          item.PROD_CODIGO2 == codigoItem ||
-          item.PROD_CODIGO3 == codigoItem ||
-          item.PROD_CODIGO4 == codigoItem,
-    );
-     */
-
-    // Find all items with the same product code
     List<ItemPedido> itemsWithSameCode = itemsList.where((item) => item.PROD_CODIGO == codigoItem).toList();
 
-    // Check if any of the items with the same code have not been fully conferred
     bool anyItemNotFullyConferred = itemsWithSameCode.any((item) => int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
 
     if (anyItemNotFullyConferred) {
-      // Find the first item with the same code that has not been fully conferred
       ItemPedido itemToIncrement = itemsWithSameCode.firstWhere((item) => int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
-
-      // Increment the quantity conferred for the selected item
       itemToIncrement.ITPD_QTD_CONFERIDO = (int.tryParse(itemToIncrement.ITPD_QTD_CONFERIDO!)! + 1).toString();
 
-      // Update the item in the list
-      int index = itemsList.indexOf(itemToIncrement);
-      itemsList[index] = itemToIncrement;
-
-      // Add the modified item to the list of modified items
       adicionarOuAtualizarItemModificado(ItemLido(
           itpdId: itemToIncrement.ITPD_ID,
           itpdQtdConf: itemToIncrement.ITPD_QTD_CONFERIDO,
           usrsId: loginController.userLogged.value!.USRS_ID!));
+
+      await _repository.setGravaConferencia(itens: [ItemLido(
+          itpdId: itemToIncrement.ITPD_ID,
+          itpdQtdConf: itemToIncrement.ITPD_QTD_CONFERIDO,
+          usrsId: loginController.userLogged.value!.USRS_ID!)]);
+
+      // Remover e adicionar novamente o item para movê-lo para o final da lista
+      itemsList.remove(itemToIncrement);
+      itemsList.add(itemToIncrement);
     } else {
       if (showMessage) {
         utils.showToast(
@@ -117,17 +134,27 @@ class MainController extends GetxController {
     }
 
     isLoadingSyncItens.value = true;
-    bool result =
-        await _repository.setGravaConferencia(itens: itensModificados);
-    isLoadingSyncItens.value = false;
 
-    if (result) {
-      utils.showToast(message: "Dados salvos com sucesso!", isError: false);
+    for (var itemModificado in itensModificados) {
+      bool result = await _repository.setGravaConferencia(itens: [itemModificado]);
 
-      for (var itemModificado in itensModificados) {
+      if (result) {
         itemsList.removeWhere((item) => item.ITPD_ID == itemModificado.itpdId);
+        utils.showToast(message: "Item ${itemModificado.itpdId} sincronizado com sucesso!", isError: false);
+      } else {
+        utils.showToast(
+            message:
+            "Ocorreu um erro ao gravar o item ${itemModificado.itpdId}, tente novamente.",
+            isError: true);
+        break;
       }
 
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    isLoadingSyncItens.value = false;
+
+    if (itensModificados.isEmpty) {
       pedidoSelected.value = Pedido();
       itensModificados.clear();
       itemsList.clear();
@@ -135,13 +162,10 @@ class MainController extends GetxController {
       selectedProdutoName.text = "";
       itemPedidoSelected.value = ItemPedido();
 
-      update();
-    } else {
-      utils.showToast(
-          message:
-              "Ocorreu um erro ao gravar os dados, tente novamente.",
-          isError: true);
+      utils.showToast(message: "Todos os itens foram sincronizados com sucesso!", isError: false);
     }
+
+    update();
   }
 
   Future<void> getPedidos({required String codigoPedido}) async {
@@ -185,7 +209,7 @@ class MainController extends GetxController {
         isLoadingPedidos.value = false;
         utils.showToast(
             message:
-                "Ocorreu um erro ao realizar a busca da lista de pedidos, tente novamente.",
+            "Ocorreu um erro ao realizar a busca da lista de pedidos, tente novamente.",
             isError: true);
       },
     );
@@ -197,7 +221,7 @@ class MainController extends GetxController {
       {required String pddsID, required String setorID}) async {
     isLoadingItens.value = true;
     final ApiResult result =
-        await _repository.getItensPedidos(pddsID: pddsID, setorID: setorID);
+    await _repository.getItensPedidos(pddsID: pddsID, setorID: setorID);
     isLoadingItens.value = false;
 
     result.when(
@@ -207,7 +231,7 @@ class MainController extends GetxController {
       error: (error) {
         utils.showToast(
             message:
-                "Ocorreu um erro ao realizar a busca da lista de itens, tente novamente.",
+            "Ocorreu um erro ao realizar a busca da lista de itens, tente novamente.",
             isError: true);
       },
     );
@@ -218,7 +242,7 @@ class MainController extends GetxController {
   Future<void> setReiniciaConferencia({required String pddsID}) async {
     isLoadingItens.value = true;
     final dynamic result =
-        await _repository.setReiniciaConferencia(pddsID: pddsID);
+    await _repository.setReiniciaConferencia(pddsID: pddsID);
     isLoadingItens.value = false;
 
     if (result != null) {
@@ -241,7 +265,7 @@ class MainController extends GetxController {
   Future<void> setCancelaConferencia({required String pddsID}) async {
     isLoadingItens.value = true;
     final dynamic result =
-        await _repository.setCancelaConferencia(pddsID: pddsID);
+    await _repository.setCancelaConferencia(pddsID: pddsID);
     isLoadingItens.value = false;
 
     print(result);
