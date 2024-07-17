@@ -60,30 +60,52 @@ class MainController extends GetxController {
     }
   }
 
-  void marcarItemComoEdicao(String itemId) {
+  Future<void> enviarItemModificado(ItemLido item) async {
+    bool result = await _repository.setGravaConferencia(itens: [item]);
+
+    if (result) {
+      utils.showToast(message: "Item ${item.itpdId} sincronizado com sucesso!",
+          isError: false);
+    } else {
+      utils.showToast(
+          message: "Ocorreu um erro ao gravar o item ${item
+              .itpdId}, tente novamente.",
+          isError: true);
+    }
+  }
+
+  void marcarItemComoEdicao(String itemId) async {
     int indexItemsList = itemsList.indexWhere((item) => item.ITPD_ID == itemId);
     if (indexItemsList != -1) {
       var item = itemsList[indexItemsList];
-      item.ITPD_EDICAO = !(item.ITPD_EDICAO ?? false);
+      item.ITPD_EDICAO = (!(item.ITPD_EDICAO == "True") ? "True" : "False");
       itemsList[indexItemsList] = item;
     }
 
-    int indexItensModificados = itensModificados.indexWhere((it) => it.itpdId == itemId);
+    int indexItensModificados = itensModificados.indexWhere((it) =>
+    it.itpdId == itemId);
+    ItemLido itemModificado;
     if (indexItensModificados != -1) {
       var item = itensModificados[indexItensModificados];
-      item.edicao = !(item.edicao ?? false);
-      item.itpdQtdConf = itemsList.firstWhere((it) => it.ITPD_ID == itemId).ITPD_QTD_CONFERIDO;
+      item.edicao = (!(item.edicao == "True") ? "True" : "False");
+      item.itpdQtdConf = itemsList
+          .firstWhere((it) => it.ITPD_ID == itemId)
+          .ITPD_QTD_CONFERIDO;
       item.usrsId = loginController.userLogged.value!.USRS_ID!;
       itensModificados[indexItensModificados] = item;
+      itemModificado = item;
     } else {
       var itemFromList = itemsList.firstWhere((it) => it.ITPD_ID == itemId);
-      itensModificados.add(ItemLido(
+      itemModificado = ItemLido(
         itpdId: itemId,
-        edicao: true,
+        edicao: "True",
         itpdQtdConf: itemFromList.ITPD_QTD_CONFERIDO,
         usrsId: loginController.userLogged.value!.USRS_ID!,
-      ));
+      );
+      itensModificados.add(itemModificado);
     }
+
+    await enviarItemModificado(itemModificado);
 
     update();
   }
@@ -96,11 +118,14 @@ class MainController extends GetxController {
 
     List<ItemPedido> itemsWithSameCode = itemsList.where((item) => item.PROD_CODIGO == codigoItem).toList();
 
-    bool anyItemNotFullyConferred = itemsWithSameCode.any((item) => int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
+    bool anyItemNotFullyConferred = itemsWithSameCode.any((item) =>
+    int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
 
     if (anyItemNotFullyConferred) {
-      ItemPedido itemToIncrement = itemsWithSameCode.firstWhere((item) => int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
-      itemToIncrement.ITPD_QTD_CONFERIDO = (int.tryParse(itemToIncrement.ITPD_QTD_CONFERIDO!)! + 1).toString();
+      ItemPedido itemToIncrement = itemsWithSameCode.firstWhere((item) =>
+      int.tryParse(item.ITPD_QTD_CONFERIDO!)! < int.tryParse(item.ITPD_QTDE!)!);
+      itemToIncrement.ITPD_QTD_CONFERIDO =
+          (int.tryParse(itemToIncrement.ITPD_QTD_CONFERIDO!)! + 1).toString();
 
       adicionarOuAtualizarItemModificado(ItemLido(
           itpdId: itemToIncrement.ITPD_ID,
@@ -123,24 +148,43 @@ class MainController extends GetxController {
       }
     }
 
+    // Verifica se todos os itens foram conferidos
+    bool allItemsConferred = itemsList.every((item) =>
+    int.tryParse(item.ITPD_QTD_CONFERIDO!)! >= int.tryParse(item.ITPD_QTDE!)!);
+
+    if (allItemsConferred) {
+      await postSaveItens();
+      clearController();
+    }
+
     update();
+  }
+
+  void clearController() {
+    pedidoSelected.value = Pedido();
+    itensModificados.clear();
+    itemsList.clear();
+    selectedProdutoEndereco.text = "";
+    selectedProdutoName.text = "";
+    itemPedidoSelected.value = ItemPedido();
   }
 
   Future<void> postSaveItens() async {
     if (itensModificados.isEmpty) {
       utils.showToast(
           message: "Nenhum item para sincronizar no momento.", isError: true);
+      clear();
       return;
     }
 
     isLoadingSyncItens.value = true;
 
     for (var itemModificado in itensModificados) {
-      bool result = await _repository.setGravaConferencia(itens: [itemModificado]);
+      bool result = await _repository.setGravaConferencia(
+          itens: [itemModificado]);
 
       if (result) {
         itemsList.removeWhere((item) => item.ITPD_ID == itemModificado.itpdId);
-        utils.showToast(message: "Item ${itemModificado.itpdId} sincronizado com sucesso!", isError: false);
       } else {
         utils.showToast(
             message:
@@ -155,18 +199,24 @@ class MainController extends GetxController {
     isLoadingSyncItens.value = false;
 
     if (itensModificados.isEmpty) {
-      pedidoSelected.value = Pedido();
-      itensModificados.clear();
-      itemsList.clear();
-      selectedProdutoEndereco.text = "";
-      selectedProdutoName.text = "";
-      itemPedidoSelected.value = ItemPedido();
-
-      utils.showToast(message: "Todos os itens foram sincronizados com sucesso!", isError: false);
+      clear();
+      utils.showToast(
+          message: "Todos os itens foram sincronizados com sucesso!",
+          isError: false);
     }
 
     update();
   }
+
+  void clear() {
+    pedidoSelected.value = Pedido();
+    itensModificados.clear();
+    itemsList.clear();
+    selectedProdutoEndereco.text = "";
+    selectedProdutoName.text = "";
+    itemPedidoSelected.value = ItemPedido();
+  }
+
 
   Future<void> getPedidos({required String codigoPedido}) async {
     isLoadingPedidos.value = true;
@@ -246,7 +296,6 @@ class MainController extends GetxController {
     isLoadingItens.value = false;
 
     if (result != null) {
-
       selectedProdutoName.text = "";
       selectedProdutoEndereco.text = "";
       itemPedidoSelected.value = ItemPedido();
@@ -312,7 +361,8 @@ class MainController extends GetxController {
       },
       error: (error) {
         utils.showToast(
-            message: "Erro ao recarregar a lista de itens, tente novamente.", isError: true);
+            message: "Erro ao recarregar a lista de itens, tente novamente.",
+            isError: true);
       },
     );
 

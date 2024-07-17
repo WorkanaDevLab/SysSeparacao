@@ -50,6 +50,7 @@ class _MainScreenState extends State<MainScreen> {
     _debounceCode?.cancel();
     _debounceCode = Timer(const Duration(milliseconds: 500), () async {
       await mainController.getPedidos(codigoPedido: codeController.text);
+      codeController.clear();
       productFocusNode.requestFocus();
     });
   }
@@ -241,6 +242,7 @@ class _MainScreenState extends State<MainScreen> {
                             if (_globalKey.currentState!.validate()) {
                               await mainController.getPedidos(
                                   codigoPedido: codeController.text);
+                              codeController.clear();
                               productFocusNode.requestFocus();
                             }
                           },
@@ -386,7 +388,7 @@ class _MainScreenState extends State<MainScreen> {
                     Color? cardColor =
                     (item.ITPD_QTD_CONFERIDO == item.ITPD_QTDE)
                         ? Colors.green[100]
-                        : (item.ITPD_EDICAO == true) ? Colors.red : Colors.white;
+                        : (item.ITPD_EDICAO == "True") ? Colors.red : Colors.white;
 
                     return GestureDetector(
                       onLongPress: () {
@@ -466,6 +468,7 @@ class _MainScreenState extends State<MainScreen> {
   void clearControllers() {
     produtoController.clear();
     codeController.clear();
-    produtoController.clear();
+    codeFocusNode.requestFocus();
   }
+
 }

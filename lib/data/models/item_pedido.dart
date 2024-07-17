@@ -16,7 +16,7 @@ class ItemPedido {
   String? PROD_NOME;
   String? PROD_ENDERECO;
   String? SETR_NOME;
-  bool? ITPD_EDICAO;
+  String? ITPD_EDICAO;
 
   ItemPedido(
       {this.ITPD_ID,

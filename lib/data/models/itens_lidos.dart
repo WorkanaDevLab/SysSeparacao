@@ -2,9 +2,9 @@ class ItemLido {
   String? itpdId;
   String? itpdQtdConf;
   String? usrsId;
-  bool? edicao;
+  String? edicao;
 
-  ItemLido({this.itpdId, this.itpdQtdConf, this.usrsId, this.edicao = false});
+  ItemLido({this.itpdId, this.itpdQtdConf, this.usrsId, this.edicao = "False"});
 
   ItemLido.fromJson(Map<String, dynamic> json) {
     itpdId = json['itpd_id'];
