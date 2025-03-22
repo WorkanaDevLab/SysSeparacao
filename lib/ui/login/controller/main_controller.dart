@@ -172,7 +172,9 @@ class MainController extends GetxController {
   Future<void> postSaveItens() async {
     if (itensModificados.isEmpty) {
       utils.showToast(
-          message: "Nenhum item para sincronizar no momento.", isError: true);
+          message: "Nenhum item para sincronizar no momento.",
+          isError: true
+      );
       clear();
       return;
     }
@@ -180,16 +182,15 @@ class MainController extends GetxController {
     isLoadingSyncItens.value = true;
 
     for (var itemModificado in itensModificados) {
-      bool result = await _repository.setGravaConferencia(
-          itens: [itemModificado]);
+      bool result = await _repository.setGravaConferencia(itens: [itemModificado]);
 
       if (result) {
         itemsList.removeWhere((item) => item.ITPD_ID == itemModificado.itpdId);
       } else {
         utils.showToast(
-            message:
-            "Ocorreu um erro ao gravar o item ${itemModificado.itpdId}, tente novamente.",
-            isError: true);
+            message: "Ocorreu um erro ao gravar o item ${itemModificado.itpdId}, tente novamente.",
+            isError: true
+        );
         break;
       }
 
@@ -198,12 +199,11 @@ class MainController extends GetxController {
 
     isLoadingSyncItens.value = false;
 
-    if (itensModificados.isEmpty) {
-      clear();
-      utils.showToast(
-          message: "Todos os itens foram sincronizados com sucesso!",
-          isError: false);
-    }
+    clear();
+    utils.showToast(
+        message: "Todos os itens foram sincronizados com sucesso!",
+        isError: false
+    );
 
     update();
   }
